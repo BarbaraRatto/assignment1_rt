@@ -73,20 +73,45 @@ def distance():
 	global threshold
 	
 	# setting the threshold
-	threshold = 1				# 1 cosa???
+	threshold = 1
 	
 	# computing the relative distance between the turtles
 	distance = math.sqrt( pow(( x2 - x1 ), 2) + pow(( y2 - y1 ), 2) )
 	
 	# building a message of type Float32
 	distanceMsg = Float32()
-	distanceMsg.data = distance		# distanceMsg.data è la variabile
+	distanceMsg.data = distance
 	
 	# publishing on a topic the relative distance between the turtles
 	pubDistance.publish(distanceMsg)
 	
 	# stopping the turtles if they are too close
 	if distance <= threshold:
+		
+		# teleporting the moving turtle out of the 'threshold zone'
+		# computing the angle
+		deltaX = x2 - x1
+		deltaY = y2 - y1
+		alpha = math.atan2(deltaY, deltaX)
+		
+		# distance to do in reverse
+		reverseDistance = threshold - distance + 0.1
+		
+		if vel_x1 != 0 or vel_y1 != 0 or vel_theta1 != 0:
+			# computing the new coordinates in which teleporting turtle1
+			x1_teleport = x1 - reverseDistance * math.cos(alpha)
+			y1_teleport = y1 - reverseDistance * math.sin(alpha)
+			
+			teleportTurtle1(x1_teleport, y1_teleport, theta1)
+			
+		elif vel_x2 != 0 or vel_y2 != 0 or vel_theta2 != 0:
+			# computing the new coordinates in which teleporting turtle2
+			x2_teleport = x2 + reverseDistance * math.cos(alpha)
+			y2_teleport = y2 + reverseDistance * math.sin(alpha)
+			
+			teleportTurtle2(x2_teleport, y2_teleport, theta2)
+				
+		
 		my_vel.linear.x = 0;
 		my_vel.linear.y = 0;
 		my_vel.angular.z = 0;
@@ -94,18 +119,46 @@ def distance():
 		pub1.publish(my_vel)
 		pub2.publish(my_vel)
 		
+		
+		
+# --------------------------------------- SAVE VELOCITY FUNCTIONS ---------------------------------------
+def turtle_velocity1(msg):
+	global vel_x1, vel_y1, vel_theta1
+	
+	vel_x1 = msg.linear.x
+	vel_y1 = msg.linear.y
+	vel_theta1 = msg.angular.z
+	
+
+def turtle_velocity2(msg):
+	global vel_x2, vel_y2, vel_theta2
+	
+	vel_x2 = msg.linear.x
+	vel_y2 = msg.linear.y
+	vel_theta2 = msg.angular.z
+
+
 
 # --------------------------------------- MAIN ---------------------------------------
 
 def main():
-	global my_vel, pub1, pub2, pubDistance, x1, y1, theta1, x2, y2, theta2, teleportTurtle1, teleportTurtle2
+	global my_vel, pub1, pub2, pubDistance, x1, y1, theta1, x2, y2, theta2, teleportTurtle1, teleportTurtle2, turtle_velocity1, turtle_velocity2, vel_x1, vel_y1, vel_theta1, vel_x2, vel_y2, vel_theta2
 	
+	# initialization of global variables
 	x1 = 5.5
 	y1 = 5.5
 	theta1 = 0.0
 	x2 = 5.5
 	y2 = 4.0
 	theta2 = 0.0
+	
+	vel_x1 = 0
+	vel_y1 = 0
+	vel_theta1 = 0
+	vel_x2 = 0
+	vel_y2 = 0
+	vel_theta2 = 0
+	
 	
 	# Initialize the node
 	rospy.init_node('UserInterfaceAssignment', anonymous=True)
@@ -127,8 +180,13 @@ def main():
 	teleportTurtle1 = rospy.ServiceProxy('/turtle1/teleport_absolute', TeleportAbsolute)
 	teleportTurtle2 = rospy.ServiceProxy('/turtle2/teleport_absolute', TeleportAbsolute)
 	
+	# subscribers to read the turtles velocities
+	rospy.Subscriber('turtle1/cmd_vel', Twist, turtle_velocity1)	# topic to read velocity of turtle1
+	rospy.Subscriber('turtle2/cmd_vel', Twist, turtle_velocity2)	# topic to read velocity of turtle2	
 
-
+	
+	print("The node Distance.py is running")
+	
 	rospy.spin()		# infinite spin
 	
 
