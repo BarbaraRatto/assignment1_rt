@@ -7,8 +7,6 @@ from turtlesim.msg import Pose
 
 from std_msgs.msg import Float32
 
-
-
 # --------------------------------------- CALLBACK 1 ---------------------------------------
 def turtle_callback1(msg):
 	global x1, y1, theta1
@@ -20,6 +18,13 @@ def turtle_callback1(msg):
 	# computing the distance
 	distance()
 		
+	# stoppig turtle1 if its position is too close to the boundaries
+	if ( x1 <= 1.0 or x1 >= 10.0 or y1 <= 1.0 or y1 >= 10.0 ):
+		my_vel.linear.x = 0;
+		my_vel.linear.y = 0;
+		my_vel.angular.z = 0;
+		 
+		pub1.publish(my_vel)	
 
 # --------------------------------------- CALLBACK 2 ---------------------------------------
 def turtle_callback2(msg):
@@ -32,6 +37,14 @@ def turtle_callback2(msg):
 	# computing the distance
 	distance()
 		
+		
+	# stoppig turtle2 if its position is too close to the boundaries
+	if ( x2 <= 1.0 or x2 >= 10.0 or y2 <= 1.0 or y2 >= 10.0 ):
+		my_vel.linear.x = 0;
+		my_vel.linear.y = 0;
+		my_vel.angular.z = 0;
+		
+		pub2.publish(my_vel)
 
 # --------------------------------------- FUNCTION DISTANCE ---------------------------------------
 def distance():
