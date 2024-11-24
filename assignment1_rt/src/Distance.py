@@ -6,6 +6,7 @@ from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
 
 from std_msgs.msg import Float32
+from turtlesim.srv import TeleportAbsolute
 
 # --------------------------------------- CALLBACK 1 ---------------------------------------
 def turtle_callback1(msg):
@@ -17,14 +18,25 @@ def turtle_callback1(msg):
 	
 	# computing the distance
 	distance()
-		
+	
 	# stoppig turtle1 if its position is too close to the boundaries
 	if ( x1 <= 1.0 or x1 >= 10.0 or y1 <= 1.0 or y1 >= 10.0 ):
 		my_vel.linear.x = 0;
 		my_vel.linear.y = 0;
 		my_vel.angular.z = 0;
 		 
-		pub1.publish(my_vel)	
+		pub1.publish(my_vel)
+		
+		# calling the teleport service to take back turtle1 inside the boundaries
+		if( x1 <= 1.0 ):
+			teleportTurtle1(1.1, y1, theta1)
+		if( x1 >= 10.0 ):
+			teleportTurtle1(9.9, y1, theta1)
+		if( y1 <= 1.0 ):
+			teleportTurtle1(x1, 1.1, theta1)
+		if( y1 >= 10.0 ):
+			teleportTurtle1(x1, 9.9, theta1)
+		
 
 # --------------------------------------- CALLBACK 2 ---------------------------------------
 def turtle_callback2(msg):
@@ -36,8 +48,7 @@ def turtle_callback2(msg):
 
 	# computing the distance
 	distance()
-		
-		
+
 	# stoppig turtle2 if its position is too close to the boundaries
 	if ( x2 <= 1.0 or x2 >= 10.0 or y2 <= 1.0 or y2 >= 10.0 ):
 		my_vel.linear.x = 0;
@@ -45,6 +56,17 @@ def turtle_callback2(msg):
 		my_vel.angular.z = 0;
 		
 		pub2.publish(my_vel)
+		
+		# calling the teleport service to take back turtle2 inside the boundaries
+		if( x2 <= 1.0 ):
+			teleportTurtle2(1.1, y2, theta2)
+		if( x2 >= 10.0 ):
+			teleportTurtle2(9.9, y2, theta2)
+		if( y2 <= 1.0 ):
+			teleportTurtle2(x2, 1.1, theta2)
+		if( y2 >= 10.0 ):
+			teleportTurtle2(x2, 9.9, theta2)
+		
 
 # --------------------------------------- FUNCTION DISTANCE ---------------------------------------
 def distance():
@@ -63,7 +85,7 @@ def distance():
 	# publishing on a topic the relative distance between the turtles
 	pubDistance.publish(distanceMsg)
 	
-	
+	# stopping the turtles if they are too close
 	if distance <= threshold:
 		my_vel.linear.x = 0;
 		my_vel.linear.y = 0;
@@ -89,7 +111,7 @@ def main():
 	rospy.init_node('UserInterfaceAssignment', anonymous=True)
 	
 	# defining my_vel
-	my_vel = Twist()			# my_vel è un oggetto di tipo twist 
+	my_vel = Twist()			# my_vel is an object of type Twist 
 	
 	# Defining the publisher and subscriber
 	pub1 = rospy.Publisher('turtle1/cmd_vel', Twist, queue_size=1)	# topic: turtle1/cmd_vel
@@ -101,6 +123,12 @@ def main():
 	# topic where to publish the distance between the turtles
 	pubDistance = rospy.Publisher('distanceTopic', Float32, queue_size=10)
 	
+	# initializing the services to teleport turtle1 and turtle2
+	teleportTurtle1 = rospy.ServiceProxy('/turtle1/teleport_absolute', TeleportAbsolute)
+	teleportTurtle2 = rospy.ServiceProxy('/turtle2/teleport_absolute', TeleportAbsolute)
+	
+
+
 	rospy.spin()		# infinite spin
 	
 
