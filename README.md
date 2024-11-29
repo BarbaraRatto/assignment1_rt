@@ -2,6 +2,7 @@
 
 The first thing required to run the following repository is to have ROS noetic.
 In order to use these ROS nodes you have to run the following commands in 4 different terminals. 
+
 terminal 1:
 
 	roscore
