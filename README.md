@@ -52,3 +52,9 @@ The subscription to the topics *turtle1/pose* and *turtle2/pose* allows reading 
 Instead, the following reasoning has been done to handle the situation where the turtles are getting too close to the boundaries.
 
 The control that prevents the turtles crashing into the boundaries is implemented in the functions *turtle_callback1* and *turtle_callback2*. If a turtle crosses the limit distance, it is not only stopped but also teleported back on its trajectory by a small stretch, as done for the previous case. 
+
+
+
+## Note
+
+If the user inserts not too high velocities, the node does its job well. If high velocities are chosen (like 100) the node may no work as established. 
